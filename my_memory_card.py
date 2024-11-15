@@ -5,6 +5,25 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QHBoxLayout,
 
 from random import shuffle
 
+
+class Question():
+    def __init__(self, question, right_answer, wrong1, wrong2, wrong3):
+        self.question = question
+        self.right_answer = right_answer
+        self.wrong1 = wrong1
+        self.wrong2 = wrong2
+        self.wrong3 = wrong3
+
+
+questions_list = []
+questions_list.append(Question(
+    'Из чего состоит бумага?', 'Древесная Целлюлоза', 'Бетон', 'Пластик', 'Грязь'
+))
+questions_list.append(Question(
+    'Зачем нужна математика?', 'Чтобы быть успешным', 'По приколу', 'Так мама сказала', 'Для позвоночника'
+))
+
+
 app = QApplication([])
 
 window = QWidget()
@@ -91,16 +110,16 @@ def show_question():
 
 answers = [rbtn1, rbtn2, rbtn3, rbtn4]
 
-def ask(question, right_answer, wrong1, wrong2, wrong3):
+def ask(q: Question):
     ''' функция записывает значения вопроса и ответов в соответствующие виджеты, 
     при этом варианты ответов распределяются случайным образом'''
     shuffle(answers)
-    answers[0].setText(right_answer)
-    answers[1].setText(wrong1)
-    answers[2].setText(wrong2)
-    answers[3].setText(wrong3)
-    lb_Question.setText(question)
-    lb_Correct.setText(right_answer) 
+    answers[0].setText(q.right_answer)
+    answers[1].setText(q.wrong1)
+    answers[2].setText(q.wrong2)
+    answers[3].setText(q.wrong3)
+    lb_Question.setText(q.question)
+    lb_Correct.setText(q.right_answer) 
     show_question()
 
 
@@ -119,10 +138,23 @@ def check_answer():
             show_correct('Неверно!')
 
 
-btn_OK.clicked.connect(check_answer) # проверяем, что панель ответов показывается при нажатии на кнопку
+def next_question():
+    window.cur_question += 1
+    if window.cur_question >= len(questions_list):
+        window.cur_question = 0
+    q = questions_list[window.cur_question]
+    ask(q)
 
-ask('Государственный язык Бразилии', 'Португальский', 'Бразильский', 'Испанский', 'Итальянский')
 
+def click_OK():
+    if btn_OK.text() == 'Ответить':
+        check_answer()
+    else:
+        next_question()
+
+btn_OK.clicked.connect(click_OK) # проверяем, что панель ответов показывается при нажатии на кнопку
+
+window.cur_question = -1
 window.setLayout(layout_main)
 
 window.resize(500, 400)
